@@ -296,14 +296,19 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, (0, 0, 0, 0))
+        #util.raiseNotDefined()
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for corner_visited in state[1]:
+            if not corner_visited:
+                return False
+        return True
+        #util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
         """
@@ -324,8 +329,26 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
             "*** YOUR CODE HERE ***"
+            
+            x, y = state[0]
+            corner_visited = state[1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            
+            if not hitsWall:
+                list_visited = []
+                for i in range(0,4):
+                    if nextx == self.corners[i][0] and nexty == self.corners[i][1]:
+                        list_visited.append(True)
+                    elif corner_visited[i] == True:
+                        list_visited.append(True)
+                    else:
+                        list_visited.append(False)
+                
+                new_corners_visited = (list_visited[0], list_visited[1], list_visited[2], list_visited[3])
+                successors.append((((nextx, nexty), new_corners_visited), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -361,7 +384,18 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    
+    curent_pos = state[0]
+    corners_visited = state[1]
+    furthest = 0
+    for i in range(0,4):
+        if not corners_visited[i]:
+            distance = abs(curent_pos[0] - corners[i][0]) + abs(curent_pos[1] - corners[i][1])
+            if distance > furthest:
+                furthest = distance
+    
+    return furthest
+    #return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -455,7 +489,15 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    
+    furthest = 0
+    foodList = foodGrid.asList()
+    for i in range(0, len(foodList)):
+        dist = mazeDistance(position, foodList[i], problem.startingGameState)
+        if dist > furthest:
+            furthest = dist    
+    
+    return furthest
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -486,7 +528,10 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        return search.bfs(problem)
+        
+        #util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -522,7 +567,12 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        if self.food[x][y]:
+            return True
+        return False
+        
+        #util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """

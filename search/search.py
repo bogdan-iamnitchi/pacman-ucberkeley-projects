@@ -167,8 +167,8 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     #util.raiseNotDefined()
 
     explored = set()
-    frontier = util.PriorityQueue()
-    frontier.push((problem.getStartState(), [], 0), 0)
+    frontier = util.PriorityQueueWithFunction(lambda x: x[2] + heuristic(x[0], problem))
+    frontier.push((problem.getStartState(), [], 0))
 
     while not frontier.isEmpty():
         curState, curMoves, curCost = frontier.pop()
@@ -177,7 +177,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
         if curState not in explored:
             explored.add(curState)
             for state, move, cost in problem.getSuccessors(curState):
-                frontier.push((state, curMoves + [move], curCost + cost), curCost + cost + heuristic(state, problem))
+                frontier.push((state, curMoves + [move], curCost + cost))
     return []
 
 
